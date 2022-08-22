@@ -1,38 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- HAMMER JS META -->
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta name="msapplication-tap-highlight" content="no" />
+
     <title>NFT avatar picker</title>
-</head>
-<body>
+  </head>
+  <body>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            background: black;
-        }
-        .picker {
-            height: 100vh;
-            /* gradien overlay above backgound image */
-            background: url(photo.jpg) 50% 50% no-repeat, rgba(0, 0, 0, 0.5);
-            background-blend-mode: multiply;
-            background-size: 60%;
-            /* move image from center */
-            /* transform: scale() translate3d() */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .preview {
-            position: relative;
-            /* preview */
+      :root {
+        --bg-x: 0px;
+        --bg-y: 0px;
+        --bg-size: 100%;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: black;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      .picker {
+        height: 100%;
+        /* gradien overlay above backgound image */
+        background: url(photo.jpg) no-repeat, rgba(0, 0, 0, 0.5);
+        background-position-x: calc(50% + var(--bg-x));
+        background-position-y: calc(50% + var(--bg-y));
+        background-size: var(--bg-size);
+        background-blend-mode: multiply;
+        /* move image from center */
+        /* transform: scale() translate3d() */
+        position: relative;
+      }
+      /* .preview {
+            clip-path: polygon(50% 1%, 90% 20%, 100% 63%, 72% 98%, 28% 98%, 0% 63%, 10% 20%);
+            background: url(photo.jpg) no-repeat, rgba(0, 0, 0, 0.5);
+            background-position-x: var(--bg-x);
+            background-position-y: var(--bg-y);
+            background-size: var(--bg-size);
             width: 50%;
-            padding-bottom: 50%;
-            
-        }
-        .preview::after,
+            height: 50%;
+        } */
+      /* .preview::after,
         .preview::before {
             content: '';
             position: absolute;
@@ -46,20 +65,52 @@
             clip-path: polygon(50% 1%, 90% 20%, 100% 63%, 72% 98%, 28% 98%, 0% 63%, 10% 20%);
             background-image: url(photo.jpg);
             background-repeat: no-repeat;
-            background-position: 50% 50%;
-            background-size: 120%;
-        }
-        .preview::after {
+            background-position-x: calc(250% - (var(--bg-x) * 4));
+            /* background-position-y: calc(var(--bg-y) * 4); */
+      /* background-position-y: -70%;
+            background-position-y: 170%;
+            background-size: calc(var(--bg-size) * 2);
+        } */
+      /* .preview::after {
             background: url(polygon.svg) no-repeat center center;
             background-size: 100%;
-        }
+        } */
+
+      .polygon {
+        background: url(polygon.svg) no-repeat center center;
+        background-size: 50%;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+
+      /* TRANSITIONS */
+      .picker,
+      .preview {
+        /* transition-property: background-position, background-size; */
+        /* transition-duration: 10ms, 10ms; */
+        /* transition-timing-function: ease-in, ease-in; */
+      }
     </style>
-    <div class="picker">
-        <!-- <div class="minipreview"></div> -->
-        <div class="preview"></div>
+    <div class="picker" id="touch">
+      <!-- <div class="minipreview"></div> -->
+      <div class="preview"></div>
+      <div class="polygon"></div>
     </div>
     <script>
-        // PICKER listen touch events (pull, pinch)
+      // PICKER listen touch events (pull, pinch)
+      function getImageSize() {
+        const img = new Image();
+        img.onload = function () {
+          const { width, height } = this;
+
+          //   alert(`${width} ${window.innerWidth * 1 * 0.1}`);
+        };
+        img.src = "photo.jpg";
+      }
+      getImageSize();
     </script>
-</body>
+    <script src="./hammer.min.js"></script>
+    <script src="./touch.js"></script>
+  </body>
 </html>
