@@ -1,4 +1,6 @@
 const container = document.getElementById("touch");
+// const moveBG = _.throttle(updateCss, 100);
+const moveBG = updateCss;
 
 // interact(container).draggable({
 //   listeners: {
@@ -11,10 +13,19 @@ const container = document.getElementById("touch");
 var hammertime = new Hammer(container);
 hammertime.get("pan").set({ direction: Hammer.DIRECTION_ALL });
 hammertime.on("pan", function (ev) {
-  console.log(ev);
-  pan(container, ev);
+  pan(container, ev, CROP);
 });
 
+hammertime.on("panend", function (ev) {
+  // update POS
+  const { deltaX: dx, deltaY: dy } = ev;
+  const maxDelta = getMaxDelta(container, CROP);
+  updatePOS(maxDelta, { dx, dy });
+  // update BG
+  moveBG(POS);
+});
+
+const CROP = 0.5;
 const POS = {
   x: 0,
   y: 0,
@@ -35,7 +46,15 @@ function getMaxDelta(container, crop) {
 
 function offsetBackground(maxDelta, delta) {
   //   updatePOS(maxDelta, delta);
-  updateCss(maxDelta, delta);
+  const pos = calcPos(maxDelta, delta);
+  moveBG(pos);
+}
+
+function calcPos(maxDelta, { dx, dy }) {
+  return {
+    x: applyOffsetBounds(maxDelta, POS.x + dx),
+    y: applyOffsetBounds(maxDelta, POS.y + dy),
+  };
 }
 
 function updatePOS(maxDelta, { dx, dy }) {
@@ -50,12 +69,11 @@ function applyOffsetBounds(maxDelta, value) {
   return Math.min(Math.max(-maxDelta, value), maxDelta);
 }
 
-function updateCss(maxDelta, { dx, dy }) {
-  // function updateCss({ x, y }) {
+function updateCss({ x, y }) {
   let root = document.documentElement;
   root.style.setProperty("--bg-x", x + "px");
   root.style.setProperty("--bg-y", y + "px");
 }
 
-// hammertime.get('pinch').set({ enable: true });
+hammertime.get("pinch").set({ enable: true });
 // hammertime.get('rotate').set({ enable: true });

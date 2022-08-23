@@ -87,13 +87,21 @@
       /* TRANSITIONS */
       .picker,
       .preview {
-        /* transition-property: background-position, background-size; */
-        /* transition-duration: 10ms, 10ms; */
-        /* transition-timing-function: ease-in, ease-in; */
+        /* transition-property: background-position; */
+        /* transition-duration: 100ms; */
+        /* transition-timing-function: ease-out; */
+
+        /* transition-property: background-position, background-size;
+        transition-duration: 100ms, 10ms;
+        transition-timing-function: ease-in, ease-in; */
       }
     </style>
     <div class="picker" id="touch">
+      <!-- IMAGE -->
+      <!-- move with transform3d, scale, rotate -->
       <!-- <div class="minipreview"></div> -->
+
+      <!-- GRADIENT OVERLAY -->
       <div class="preview"></div>
       <div class="polygon"></div>
     </div>
@@ -110,6 +118,7 @@
       }
       getImageSize();
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="./hammer.min.js"></script>
     <script src="./touch.js"></script>
   </body>
