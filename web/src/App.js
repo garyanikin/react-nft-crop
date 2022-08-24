@@ -3,6 +3,7 @@ import "./App.css";
 
 import React, { useEffect } from "react";
 import photoSrc from "./photo.jpg";
+import polygonSrc from "./polygon.svg";
 import { useSpring, animated } from "@react-spring/web";
 // import { useDrag } from "@use-gesture/react";
 
@@ -21,18 +22,23 @@ const useGesture = createUseGesture([dragAction, pinchAction]);
 //   { drag: dragConfig, pinch: pinchConfig }
 // )
 
-function getPosition() {
+function getPosition({ x, y }) {
   // current position
-  return [0, 0];
+  return () => [x.get(), y.get()];
 }
 
-function getBounds() {
+function getBounds(scale) {
   // based on scale
-  return { left: -100, right: 100, top: -50, bottom: 50 };
+  return () => {
+    // получить соотношение полигона к изображернию
+    const _scale = scale.get();
+    const size = 100 * scale.get();
+    console.log("size", size, _scale);
+    return { left: -size, right: size, top: -size, bottom: size };
+  };
 }
 
 function getScaleBounds() {
-  // based on image size and max avatar size
   return { min: 0.5, max: 2 };
 }
 
@@ -48,20 +54,6 @@ function App() {
       document.removeEventListener("gestureend", handler);
     };
   }, []);
-
-  const options = {
-    from: getPosition(),
-    // const [{ x }, api] = useSpring(() => ({ x: 0 }))
-    // const bind = useDrag(
-    //   ({ down, offset: [ox] }) => api.start({ x: down ? ox : 0, immediate: down, config: { duration: 3000 } }),
-    //   { from: () => [x.get(), 0] }
-    // )
-    bounds: getBounds(),
-    scaleBounds: getScaleBounds(),
-    rubberband: true, // для реалистичности
-    filterTaps: true,
-    preventScroll: true,
-  };
 
   // const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
 
@@ -82,34 +74,103 @@ function App() {
   // })
 
   const ref = React.useRef(null);
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
+  const [style, api] = useSpring(() => ({
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotateZ: 0,
+  }));
+
+  const options = {
+    from: getPosition(style),
+    // const [{ x }, api] = useSpring(() => ({ x: 0 }))
+    // const bind = useDrag(
+    //   ({ down, offset: [ox] }) => api.start({ x: down ? ox : 0, immediate: down, config: { duration: 3000 } }),
+    //   { from: () => [x.get(), 0] }
+    // )
+    bounds: getBounds(style.scale),
+    scaleBounds: getScaleBounds(),
+    rubberband: true, // для реалистичности
+    filterTaps: true,
+  };
+
   useGesture(
     {
-      onDrag: ({ event, offset: [x, y] }) => {
+      onDrag: ({ pinching, cancel, event, offset: [x, y] }) => {
+        if (pinching) return cancel();
+
         event.preventDefault();
         api.start({ x, y });
       },
-      onPinch: () => {},
+      onPinch: ({
+        origin: [ox, oy],
+        first,
+        movement: [ms],
+        offset: [s, a],
+        memo,
+      }) => {
+        if (first) {
+          const { width, height, x, y } = ref.current.getBoundingClientRect();
+          const tx = ox - (x + width / 2);
+          const ty = oy - (y + height / 2);
+          memo = [style.x.get(), style.y.get(), tx, ty];
+        }
+
+        const x = memo[0] - (ms - 1) * memo[2];
+        const y = memo[1] - (ms - 1) * memo[3];
+
+        // IN bound on scale and rotate
+        // https://use-gesture.netlify.app/docs/utilities/
+
+        api.start({ scale: s, rotateZ: a, x, y });
+        return memo;
+      },
     },
     {
       target: ref,
       drag: options,
+      pinch: { scaleBounds: { min: 0.5, max: 2 }, rubberband: true },
     }
   );
 
   // Bind it to a component
   return (
-    <div className="App">
+    <div className="App container">
       {/* touch-action: none */}
-      <animated.img
+      <animated.div
         ref={ref}
-        src={photoSrc}
-        draggable={false}
-        style={{ x, y }}
+        // src={photoSrc}
+        // draggable={false}
+        style={style}
         className="photo"
       />
+      <div className="preview">
+        {/* <animated.div style={getPreviewPosition({ x, y })} className="image" /> */}
+        {/* <img className="overlay" src={polygonSrc} /> */}
+        {/* to DIV */}
+        <img src={polygonSrc} />
+      </div>
     </div>
   );
+}
+
+function getPreviewPosition({ x, y }) {
+  const width = window.innerWidth * 0.675;
+  const height = window.innerHeight * 0.675;
+
+  console.log(x.to, x.to([0, 1], [0, 100]));
+
+  return {};
+
+  console.log(x, y, width, {
+    backgroundPositionX: x - width / 2,
+    backgroundPositionY: y - height / 2,
+  });
+
+  return {
+    backgroundPositionX: x - width / 2,
+    backgroundPositionY: y - height / 2,
+  };
 }
 
 export default App;
