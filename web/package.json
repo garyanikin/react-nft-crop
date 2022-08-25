@@ -1,6 +1,7 @@
 {
   "name": "web",
   "version": "0.1.0",
+  "homepage": "https://garyanikin.github.io/react-nft-crop",
   "private": true,
   "dependencies": {
     "@react-spring/web": "^9.5.2",
