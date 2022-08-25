@@ -1,3 +1,7 @@
+:root {
+  --polygon-size: 52vw;
+}
+
 body {
   touch-action: none;
   -moz-user-select: none;
@@ -7,15 +11,28 @@ body {
 
 .photo {
   opacity: 0.45;
-  width: 400px;
-  height: 400px;
-  background: url(./photo.jpg) no-repeat 50% 50%;
+  background-size: contain;
   /* background-size: contain; */
   /* background: red; */
   touch-action: none;
   -moz-user-select: none;
   -webkit-user-drag: none;
   user-select: none;
+}
+
+.photo_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  pointer-events: none;
 }
 
 body,
@@ -39,6 +56,22 @@ html,
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  /* bonds to ploygonSize */
+  width: var(--polygon-size);
+  height: var(--polygon-size);
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+.preview .image-container {
+  width: 400px;
+  height: 400px;
+}
+
+.preview .image-content {
+  background-size: contain;
 }
 
 .preview .image {
@@ -46,60 +79,85 @@ html,
   top: 0;
   width: 100%;
   height: 100%;
-  background: url(./photo.jpg) no-repeat 50% 50%;
   position: absolute;
   z-index: 1;
   clip-path: polygon(
     50% 0%,
     90% 20%,
     100% 62%,
-    70% 100%,
-    30% 100%,
+    71.5% 98%,
+    28.5% 98%,
     0% 62%,
     10% 20%
   );
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .overlay {
   position: absolute;
   z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url(./polygon.svg) no-repeat;
+  background-size: contain;
 }
 
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
+.mini {
+  position: absolute;
+  bottom: calc(50vh + 25vw + 45px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 45px;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.mini .name {
+  font-family: "VK Sans Text";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  /* identical to box height, or 133% */
+  letter-spacing: -0.007em;
+
+  /* Dark Text/Primary */
+  color: #e1e3e6;
+  white-space: nowrap;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.mini small {
+  font-family: "VK Sans Text";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  /* identical to box height, or 117% */
+  letter-spacing: 0.005em;
+
+  /* White / Alpha40 */
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.App-link {
-  color: #61dafb;
+.minipreview {
+  width: 45px;
+  height: 45px;
+  padding-right: 7px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.minipreview .overlay {
+  width: 45px;
+}
+
+.minipreview .preview {
+  left: 0;
+  top: 0;
+
+  transform-origin: left top;
 }
