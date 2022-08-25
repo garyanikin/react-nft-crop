@@ -67,6 +67,10 @@ html,
     width: var(--polygon-size-desktop);
     height: var(--polygon-size-desktop);
   }
+
+  .mini {
+    bottom: calc(50vh + (var(--polygon-size-desktop) / 2) + 45px);
+  }
 }
 
 .overlay {
