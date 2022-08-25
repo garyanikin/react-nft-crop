@@ -253,7 +253,7 @@ const Preview = animated(
       if (resizeTo) {
         polygon(half, half + 1, half - 1, 7, 3, 3, p5.PI / 2.8);
       } else {
-        polygon(half, half + 7, half - stroke, 7, 20, 5, p5.PI / 2.8);
+        polygon(half, half, half * 0.95, 7, 20, 5, p5.PI / 2.8);
       }
       p5.drawingContext.clip();
       // draw photo
@@ -287,7 +287,7 @@ const Preview = animated(
       if (resizeTo) {
         polygon(half, half + 1, half - 1, 7, 3, 3, p5.PI / 2.8);
       } else {
-        polygon(half, half + 7, half - stroke, 7, 20, 5, p5.PI / 2.8);
+        polygon(half, half, half * 0.95, 7, 20, 5, p5.PI / 2.8);
       }
 
       /** A primitive function for rounded polygonal shape

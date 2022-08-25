@@ -69,7 +69,7 @@ html,
   }
 
   .mini {
-    bottom: calc(50vh + (var(--polygon-size-desktop) / 2) + 45px);
+    bottom: calc(50vh + (var(--polygon-size-desktop) / 2) + 45px) !important;
   }
 }
 
