@@ -1,27 +1,15 @@
 import logo from "./logo.svg";
 import "./App.css";
 
-import { omit, pick } from "lodash";
+import { clamp } from "lodash";
 import React, { useEffect } from "react";
 import photoSrc from "./photo.jpg";
 import polygonSrc from "./polygon.svg";
 import { useSpring, animated } from "@react-spring/web";
-// import { useDrag } from "@use-gesture/react";
 
 // TODO use Tree shake
 import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
 const useGesture = createUseGesture([dragAction, pinchAction]);
-// const bind = useGesture(
-//   {
-//     onDrag: (state) => doSomethingWith(state),
-//     onDragStart: (state) => doSomethingWith(state),
-//     onDragEnd: (state) => doSomethingWith(state),
-//     onPinch: (state) => doSomethingWith(state),
-//     onPinchStart: (state) => doSomethingWith(state),
-//     onPinchEnd: (state) => doSomethingWith(state)
-//   },
-//   { drag: dragConfig, pinch: pinchConfig }
-// )
 
 function getPosition({ x, y }) {
   // current position
@@ -45,10 +33,20 @@ function getBounds(getImageSize, scale) {
 }
 
 function getPolygonSize() {
+  const isMobile = window.innerWidth < 500;
   const size = getComputedStyle(document.documentElement).getPropertyValue(
-    "--polygon-size"
+    isMobile ? "--polygon-size" : "--polygon-size-desktop"
   );
-  return window.innerWidth * (parseInt(size) / 100);
+
+  // Supports vw and px
+  let parsedSize;
+  if (size.indexOf("px") !== -1) {
+    parsedSize = parseInt(size);
+  } else {
+    parsedSize = window.innerWidth * (parseInt(size) / 100);
+  }
+
+  return parsedSize;
 }
 
 function getScaleBounds(imageSize) {
@@ -68,11 +66,9 @@ function App() {
   const [imageSize, setImage] = React.useState(null);
 
   useEffect(() => {
-    getImageSize(image_src).then((imageSize) => {
-      console.log("image size", imageSize);
-      setImage(imageSize);
-    });
+    getImageSize(image_src).then(setImage);
 
+    // TODO refactor to default gesture preventer
     const handler = (e) => e.preventDefault();
     document.addEventListener("gesturestart", handler);
     document.addEventListener("gesturechange", handler);
@@ -124,19 +120,20 @@ function App() {
 
   useGesture(
     {
-      onDrag: ({ pinching, cancel, event, offset: [x, y] }) => {
+      onDrag: function pan({ pinching, cancel, event, offset: [x, y] }) {
         if (pinching) return cancel();
 
         event.preventDefault();
-        api.start({ x, y, ...renderPreview({ x, y }) });
+        console.log({ x, y });
+        api.start({ x, y });
       },
-      onPinch: ({
+      onPinch: function pinch({
         origin: [ox, oy],
         first,
         movement: [ms],
         offset: [s, a],
         memo,
-      }) => {
+      }) {
         if (first) {
           const { width, height, x, y } = ref.current.getBoundingClientRect();
           const tx = ox - (x + width / 2);
@@ -144,14 +141,18 @@ function App() {
           memo = [style.x.get(), style.y.get(), tx, ty];
         }
 
-        const x = memo[0] - (ms - 1) * memo[2];
-        const y = memo[1] - (ms - 1) * memo[3];
+        let x = memo[0] - (ms - 1) * memo[2];
+        let y = memo[1] - (ms - 1) * memo[3];
 
         // IN bound on scale and rotate
-        // https://use-gesture.netlify.app/docs/utilities/
+        const bounds = getBounds(() => imageSize, { get: () => s })();
+        if (!isNaN(bounds.left)) {
+          x = clamp(x, bounds.left, bounds.right);
+          y = clamp(y, bounds.top, bounds.bottom);
+        }
 
-        // api.start({ scale: s, rotateZ: a, x, y, ...renderPreview({ x, y }) });
-        api.start({ scale: s, x, y, ...renderPreview({ x, y }) });
+        api.start({ scale: s, x, y });
+
         return memo;
       },
     },
@@ -162,7 +163,11 @@ function App() {
     }
   );
 
-  const previewStyles = ["backgroundPositionX", "backgroundPositionY"];
+  const animatedStyles = Object.assign(style, {
+    backgroundImage: `url(${image_src})`,
+    width: imageSize?.width || 0,
+    height: imageSize?.height || 0,
+  });
 
   // Bind it to a component
   return (
@@ -172,12 +177,7 @@ function App() {
         ref={ref}
         // src={photoSrc}
         // draggable={false}
-        style={{
-          ...omit(style, previewStyles),
-          backgroundImage: `url(${image_src})`,
-          width: imageSize?.width || 0,
-          height: imageSize?.height || 0,
-        }}
+        style={animatedStyles}
         className="photo"
       />
       <div className="photo_overlay" />
@@ -187,12 +187,7 @@ function App() {
             <div className="image">
               <div className="image-container">
                 <animated.div
-                  style={{
-                    ...omit(style, previewStyles),
-                    backgroundImage: `url(${image_src})`,
-                    width: imageSize?.width || 0,
-                    height: imageSize?.height || 0,
-                  }}
+                  style={animatedStyles}
                   className="image-content"
                 />
               </div>
@@ -208,21 +203,18 @@ function App() {
       <div className="preview">
         <div className="image">
           <div className="image-container">
-            <animated.div
-              style={{
-                ...omit(style, previewStyles),
-                backgroundImage: `url(${image_src})`,
-                width: imageSize?.width || 0,
-                height: imageSize?.height || 0,
-              }}
-              className="image-content"
-            />
+            <animated.div style={animatedStyles} className="image-content" />
           </div>
         </div>
         <div className="overlay" />
+        <Preview style={style} />
       </div>
     </div>
   );
+}
+
+function Preview({ style }) {
+  // console.log(style);
 }
 
 function setMiniPreviewScale(size) {

@@ -1,5 +1,6 @@
 :root {
   --polygon-size: 52vw;
+  --polygon-size-desktop: 300px;
 }
 
 body {
@@ -59,6 +60,13 @@ html,
   /* bonds to ploygonSize */
   width: var(--polygon-size);
   height: var(--polygon-size);
+}
+
+@media (width > 500px) {
+  .preview {
+    width: var(--polygon-size-desktop);
+    height: var(--polygon-size-desktop);
+  }
 }
 
 .overlay {
