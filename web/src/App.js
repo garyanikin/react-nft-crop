@@ -124,7 +124,6 @@ function App() {
         if (pinching) return cancel();
 
         event.preventDefault();
-        console.log({ x, y });
         api.start({ x, y });
       },
       onPinch: function pinch({
@@ -207,15 +206,16 @@ function App() {
           </div>
         </div>
         <div className="overlay" />
-        <Preview style={style} />
+        <Preview x={style.x} y={style.y} />
       </div>
     </div>
   );
 }
 
-function Preview({ style }) {
-  // console.log(style);
-}
+const Preview = animated(({ x, y }) => {
+  console.log(x, y);
+  return null;
+});
 
 function setMiniPreviewScale(size) {
   return {
